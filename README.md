@@ -14,24 +14,8 @@ Proveer un conjunto de mejoras funcionales y técnicas que aumenten la productiv
 
 - **Mejoras continuas:** cada mejora creada para un cliente se comparte con el resto.  
 - **Código limpio y estándar:** seguimos buenas prácticas y lineamientos oficiales.  
-- **Valor agregado:** esta suite no se comercializa; es un beneficio exclusivo para clientes de AlparData.  
+- **Valor agregado:** esta suite no se comercializa; es un beneficio para clientes de AlparData y Odoo.  
 - **Reutilización:** módulos pensados para ser genéricos, útiles y fáciles de mantener.
-
----
-
-## 🗂️ Estructura del repositorio
-
-/
-├─ 18.0/ # Módulos para Odoo 18
-│ ├─ alpar_<modulo1>/
-│ ├─ alpar_<modulo2>/
-│
-├─ 19.0/ # (Opcional) Módulos adaptados a Odoo 19
-│ └─ ...
-│
-├─ docs/ # Documentación técnica y funcional
-└─ tools/ # Scripts internos o utilidades
-
 
 ---
 
@@ -40,8 +24,7 @@ Proveer un conjunto de mejoras funcionales y técnicas que aumenten la productiv
 - Extensiones para ventas, compras, inventario y contabilidad.  
 - Ajustes de interfaz y experiencia de usuario.  
 - Automatizaciones y tareas programadas.  
-- Herramientas internas para implementaciones.  
-- Adaptaciones para procesos agrícolas o industriales.  
+- Herramientas internas para implementaciones.
 - Integraciones básicas y componentes técnicos reutilizables.
 
 ---
