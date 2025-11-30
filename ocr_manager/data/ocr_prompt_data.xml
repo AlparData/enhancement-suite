@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="prompt_gemini_invoice" model="ocr.prompt">
+            <field name="name">Gemini - Factura Perú/Latam</field>
+            <field name="code">invoice_google</field>
+            <field name="provider_type">google</field>
+            <field name="document_type">invoice</field>
+            <field name="template"><![CDATA[Analiza esta imagen de factura peruana y extrae la información exacta que aparece en el documento.
+Respeta el formato JSON estricto requerido para el sistema contable.
+
+REGLAS CRÍTICAS:
+- Si algún campo no está visible o no se puede determinar con certeza, usar null
+- Los montos numéricos (total_amount, tax_amount, subtotal, unit_price) DEBEN ser números decimales, NO strings
+- Las fechas DEBEN estar en formato YYYY-MM-DD o null
+- El RUC (vat) debe tener 11 dígitos o ser null
+- La moneda debe ser código ISO (PEN, USD, EUR) o null
+- Monto total (total_amount) debe incluir todos los impuestos (IGV)
+- Si no puedes determinar el número de factura (invoice_number), usa null
+- Si no puedes determinar la fecha de vencimiento (due_date), usa null]]></field>
+        </record>
+
+        <record id="prompt_openai_invoice" model="ocr.prompt">
+            <field name="name">OpenAI - Factura Completa</field>
+            <field name="code">invoice_openai</field>
+            <field name="provider_type">openai</field>
+            <field name="document_type">invoice</field>
+            <field name="template"><![CDATA[Extrae TODA la información de esta factura y devuélvela en formato JSON estricto.
+
+IMPORTANTE: Devuelve SOLO el JSON, sin texto adicional antes o después.
+
+Formato requerido:
+{
+  "supplier": {
+    "name": "Nombre del proveedor",
+    "vat": "CUIT/RUC sin guiones",
+    "address": "Dirección completa"
+  },
+  "invoice_data": {
+    "invoice_number": "Número de factura",
+    "invoice_date": "Fecha en formato YYYY-MM-DD",
+    "due_date": "Fecha de vencimiento YYYY-MM-DD",
+    "currency": "Código de moneda (USD, ARS, PEN, etc)",
+    "total": Monto total como número,
+    "subtotal": Subtotal sin impuestos como número,
+    "tax_amount": Monto de impuestos como número
+  },
+  "line_items": [
+    {
+      "description": "Descripción del producto/servicio",
+      "quantity": Cantidad como número,
+      "unit_price": Precio unitario como número,
+      "tax_rate": Porcentaje de impuesto como número,
+      "subtotal": Subtotal de la línea como número
+    }
+  ]
+}
+
+Reglas:
+- Todos los montos deben ser números, no strings
+- Las fechas en formato YYYY-MM-DD
+- VAT/CUIT/RUC sin guiones ni espacios
+- Si no encuentras un dato, usa null
+- Extrae TODAS las líneas de productos/servicios]]></field>
+        </record>
+
+        <record id="prompt_openai_expense" model="ocr.prompt">
+            <field name="name">OpenAI - Recibo/Gasto</field>
+            <field name="code">expense_openai</field>
+            <field name="provider_type">openai</field>
+            <field name="document_type">expense</field>
+            <field name="template"><![CDATA[Extrae la información de este recibo/gasto y devuélvela en formato JSON estricto.
+
+IMPORTANTE: Devuelve SOLO el JSON, sin texto adicional.
+
+Formato:
+{
+  "supplier": {
+    "name": "Nombre del comercio/proveedor",
+    "vat": "CUIT/RUC si está disponible",
+    "address": "Dirección si está disponible"
+  },
+  "invoice_data": {
+    "invoice_number": "Número de ticket/factura",
+    "invoice_date": "Fecha YYYY-MM-DD",
+    "currency": "Código moneda",
+    "total": Monto total como número,
+    "subtotal": Subtotal como número,
+    "tax_amount": Impuestos como número
+  },
+  "line_items": [
+    {
+      "description": "Descripción",
+      "quantity": Cantidad,
+      "unit_price": Precio unitario,
+      "subtotal": Subtotal
+    }
+  ]
+}]]></field>
+        </record>
+
+        <record id="prompt_openai_other" model="ocr.prompt">
+            <field name="name">OpenAI - Documento Genérico</field>
+            <field name="code">other_openai</field>
+            <field name="provider_type">openai</field>
+            <field name="document_type">other</field>
+            <field name="template"><![CDATA[Extrae la información de este documento y devuélvela en formato JSON estricto.
+
+Formato:
+{
+  "supplier": {
+    "name": "Nombre del proveedor",
+    "vat": "CUIT/RUC",
+    "address": "Dirección"
+  },
+  "invoice_data": {
+    "invoice_number": "Número de documento",
+    "invoice_date": "Fecha YYYY-MM-DD",
+    "currency": "Código moneda",
+    "total": Monto total,
+    "subtotal": Subtotal
+  },
+  "line_items": [
+    {
+      "description": "Descripción",
+      "quantity": Cantidad,
+      "unit_price": Precio unitario,
+      "subtotal": Subtotal
+    }
+  ]
+}]]></field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_form_ocr_manager" model="ir.ui.view">
+        <field name="name">res.company.form.ocr.manager</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="OCR Manager (IA)" name="ocr_manager_config">
+                    <group>
+                        <group string="Activación">
+                            <field name="ocr_manager_enabled"/>
+                        </group>
+                        <group string="Credenciales" invisible="not ocr_manager_enabled">
+                            <field name="ocr_provider"/>
+                            <field name="ocr_api_key" password="True"/>
+                            <field name="ocr_ai_model"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

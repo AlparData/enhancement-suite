@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ocr_prompt_user,ocr.prompt.user,model_ocr_prompt,base.group_user,1,0,0,0
+access_ocr_prompt_manager,ocr.prompt.manager,model_ocr_prompt,base.group_system,1,1,1,1
+access_ocr_bulk_wizard_user,ocr.bulk.wizard.user,model_ocr_bulk_digitize_wizard,base.group_user,1,1,1,1
+access_ocr_bulk_line_user,ocr.bulk.line.user,model_ocr_bulk_digitize_line,base.group_user,1,1,1,1

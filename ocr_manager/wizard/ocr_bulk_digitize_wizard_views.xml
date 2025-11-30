@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ocr_bulk_digitize_wizard_form" model="ir.ui.view">
+        <field name="name">ocr.bulk.digitize.wizard.form</field>
+        <field name="model">ocr.bulk.digitize.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Digitalización Masiva IA">
+                <header>
+                    <button name="action_process_files" 
+                            string="🚀 Procesar Todo" 
+                            type="object" 
+                            class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    
+                    <button name="action_view_invoices" 
+                            string="Ver Facturas Creadas" 
+                            type="object" 
+                            class="oe_highlight"
+                            invisible="state != 'done'"/>
+                            
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    
+                    <group>
+                        <div class="alert alert-info" role="alert" invisible="state != 'draft'">
+                            <i class="fa fa-info-circle"/> 
+                            Suba sus facturas (PDF o Imágenes) en la lista de abajo y presione "Procesar Todo".
+                            El sistema usará la IA configurada en la compañía para extraer los datos.
+                        </div>
+                    </group>
+
+                    <field name="line_ids" readonly="state != 'draft'">
+                        <list editable="bottom">
+                            <field name="file_content" filename="filename" widget="binary" string="Archivo"/>
+                            <field name="filename" invisible="1"/>
+                            <field name="state" widget="badge" 
+                                   decoration-success="state == 'done'" 
+                                   decoration-danger="state == 'error'" 
+                                   decoration-muted="state == 'draft'"/>
+                            <field name="invoice_id" widget="many2one_button"/>
+                            <field name="error_message" invisible="state != 'error'" decoration-danger="1"/>
+                        </list>
+                    </field>
+                </sheet>
+                <footer>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ocr_bulk_digitize" model="ir.actions.act_window">
+        <field name="name">Digitalización Masiva</field>
+        <field name="res_model">ocr.bulk.digitize.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_action_ocr_bulk"
+              name="Digitalización Masiva IA"
+              action="action_ocr_bulk_digitize"
+              parent="account.menu_finance_payables"
+              sequence="5"/>
+</odoo>
