@@ -3,6 +3,7 @@ import logging
 import json
 import base64
 import io
+import re  # <--- IMPORTANTE: Necesario para la limpieza con Regex
 import fitz  # PyMuPDF
 from PIL import Image
 from odoo import models, _
@@ -135,9 +136,28 @@ class ExtractMixin(models.AbstractModel):
                 
             if inv.get('due_date'):
                 vals_to_write['invoice_date_due'] = inv['due_date']
-            if inv.get('invoice_number'):
-                vals_to_write['ref'] = inv['invoice_number']
             
+            # --- LIMPIEZA DE NÚMERO DE FACTURA (NUEVO) ---
+            if inv.get('invoice_number'):
+                raw_number = inv['invoice_number']
+                
+                # 1. Siempre guardar el original en Referencia (Fallback seguro)
+                vals_to_write['ref'] = raw_number
+                
+                # 2. Limpieza para Localización (Argentina/LATAM)
+                # Solo intentamos limpiar si el campo de localización existe en el modelo
+                if 'l10n_latam_document_number' in self._fields:
+                    # Regex: Busca patrón de 1-5 dígitos, guion, 1-8 dígitos (ej: 00001-00000001)
+                    match = re.search(r'(\d{1,5}-\d{1,8})', str(raw_number))
+                    
+                    if match:
+                        clean_number = match.group(1)
+                        vals_to_write['l10n_latam_document_number'] = clean_number
+                        # Opcional: También planchar la referencia con el limpio para que se vea mejor
+                        vals_to_write['ref'] = clean_number
+                    else:
+                        _logger.warning(f"OCR Manager: No se encontró patrón válido de factura (00000-00000000) en '{raw_number}'")
+
             # Moneda (Opcional, Odoo suele tener la de la compañía por defecto)
             if inv.get('currency'):
                 currency = self.env['res.currency'].search([('name', '=', inv['currency'])], limit=1)

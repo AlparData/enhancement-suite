@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
+    <record id="prompt_gemini_invoice_ar" model="ocr.prompt">
+      <field name="name">Gemini - Factura Argentina</field>
+      <field name="code">invoice_google_ar</field>
+      <field name="provider_type">google</field>
+      <field name="document_type">invoice</field>
+      <field name="template"><![CDATA[Analiza esta imagen de factura argentina y extrae la información exacta que aparece en el documento.
+Respeta el formato JSON estricto requerido para el sistema contable.
+
+REGLAS CRÍTICAS:
+- Si algún campo no está visible o no se puede determinar con certeza, usar null
+- Los montos numéricos (total_amount, tax_amount, subtotal, unit_price) DEBEN ser números decimales, NO strings
+- Las fechas DEBEN estar en formato YYYY-MM-DD o null
+- El CUIT (vat) del emisor debe tener 11 dígitos, sin guiones, o ser null
+- La moneda debe ser código ISO (ARS, USD, EUR) o null
+- Monto total (total_amount) debe incluir todos los impuestos (IVA)
+- En "tax_amount" sumar el total de impuestos (IVA + Percepciones si las hubiera)
+- Si no puedes determinar el número de factura (invoice_number), usa null
+- Si no puedes determinar la fecha de vencimiento (due_date), usa null]]></field>
+    </record>
         <record id="prompt_gemini_invoice" model="ocr.prompt">
             <field name="name">Gemini - Factura Perú/Latam</field>
             <field name="code">invoice_google</field>

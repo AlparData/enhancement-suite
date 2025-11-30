@@ -17,5 +17,8 @@ class ResCompany(models.Model):
     ], string="Proveedor IA", default='google')
     
     ocr_api_key = fields.Char(string="API Key", copy=False)
-    ocr_ai_model = fields.Char(string="Modelo IA", default="gemini-1.5-flash", 
-                              help="Ej: gemini-1.5-flash, gpt-4o, gpt-4-turbo")
+    ocr_ai_model = fields.Char(
+        string="Modelo IA", 
+        default="gemini-1.5-flash-002", 
+        help="Ej: gemini-1.5-flash-002, gemini-1.5-pro-002"
+    )
