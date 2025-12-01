@@ -127,7 +127,7 @@ class ExtractMixin(models.AbstractModel):
         # 1. Datos de Cabecera (Proveedor, Fecha, Referencia)
         if 'supplier' in ai_data:
             supplier_data = ai_data['supplier']
-            # Buscar partner por VAT (RUC) o Nombre
+            # Buscar partner por VAT (CUIT) o Nombre
             domain = []
             if supplier_data.get('vat'):
                 domain = [('vat', '=', supplier_data['vat'])]
