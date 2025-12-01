@@ -251,7 +251,7 @@ class ExtractMixin(models.AbstractModel):
             # 6. Actualizar estado para Odoo
             # 'waiting_validation' hace que aparezca el banner azul de "Comprobar"
             self.extract_state = 'waiting_validation' 
-            self.extract_status_code = 200
+            #self.extract_status_code = 200
             
             # Mensaje en el chatter para feedback visual
             self.message_post(body=f"Digitalización IA completada con éxito usando {company.ocr_provider}.")
