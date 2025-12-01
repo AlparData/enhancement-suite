@@ -209,58 +209,65 @@ class ExtractMixin(models.AbstractModel):
              self._recompute_dynamic_lines(recompute_all_taxes=True)
 
     def _upload_to_extract(self):
-        """ Sobrescritura principal del método de extracción """
-        self.ensure_one()
-        company = self.env.company
-        
-        # 1. Chequeo de seguridad: Si no está activo nuestro módulo, usar nativo
-        if not company.ocr_manager_enabled:
-            return super(ExtractMixin, self)._upload_to_extract()
-
-        _logger.info(f"OCR Manager: Iniciando extracción para {self.id} con {company.ocr_provider}")
-
-        try:
-            # 2. Preparar archivo
-            attachment = self.message_main_attachment_id
-            if not attachment:
-                _logger.warning("OCR Manager: No se encontró adjunto principal.")
+            """ Sobrescritura principal del método de extracción """
+            self.ensure_one()
+            company = self.env.company
+            
+            # 1. Chequeo de seguridad
+            if not company.ocr_manager_enabled:
                 return super(ExtractMixin, self)._upload_to_extract()
 
-            b64_image, mime_type = self._process_file_content(attachment)
-            
-            # 3. Obtener prompt y credenciales
-            prompt_text = self._get_manager_prompt(company.ocr_provider, 'invoice')
-            api_key = company.ocr_api_key
-            model_name = company.ocr_ai_model
+            _logger.info(f"OCR Manager: Iniciando extracción para {self.id} con {company.ocr_provider}")
 
-            if not api_key:
-                raise UserError("Falta la API Key en la configuración de la compañía.")
+            try:
+                # 2. Preparar archivo
+                attachment = self.message_main_attachment_id
+                if not attachment:
+                    _logger.warning("OCR Manager: No se encontró adjunto principal.")
+                    return super(ExtractMixin, self)._upload_to_extract()
 
-            # 4. Llamar al proveedor
-            extracted_data = {}
-            if company.ocr_provider == 'google':
-                extracted_data = self._extract_with_google(api_key, model_name, b64_image, mime_type, prompt_text)
-            elif company.ocr_provider == 'openai':
-                extracted_data = self._extract_with_openai(api_key, model_name, b64_image, mime_type, prompt_text)
-            
-            _logger.info(f"OCR Manager: Datos extraídos (JSON raw): {json.dumps(extracted_data)}")
+                b64_image, mime_type = self._process_file_content(attachment)
+                
+                # 3. Obtener prompt y credenciales
+                prompt_text = self._get_manager_prompt(company.ocr_provider, 'invoice')
+                api_key = company.ocr_api_key
+                model_name = company.ocr_ai_model
 
-            # 5. Aplicar datos a la factura
-            self._apply_ai_results(extracted_data)
-            
-            # 6. Actualizar estado para Odoo
-            # 'waiting_validation' hace que aparezca el banner azul de "Comprobar"
-            self.extract_state = 'waiting_validation' 
-            #self.extract_status_code = 200
-            
-            # Mensaje en el chatter para feedback visual
-            self.message_post(body=f"Digitalización IA completada con éxito usando {company.ocr_provider}.")
-            
-            return True
+                if not api_key:
+                    raise UserError("Falta la API Key en la configuración de la compañía.")
 
-        except Exception as e:
-            #_logger.error(f"OCR Manager Falló: {e}. Ejecutando fallback a OCR nativo de Odoo.")
-            # Opcional: Notificar en el chatter que hubo un fallo y se usó el nativo
-            #self.message_post(body=f"Fallo en IA Propia ({str(e)}). Se intentará usar el servicio nativo de Odoo.")
-            #return super(ExtractMixin, self)._upload_to_extract()
-            raise UserError(f"ERROR REAL DE LA IA: {str(e)}")
+                # 4. Llamar al proveedor
+                extracted_data = {}
+                if company.ocr_provider == 'google':
+                    extracted_data = self._extract_with_google(api_key, model_name, b64_image, mime_type, prompt_text)
+                elif company.ocr_provider == 'openai':
+                    extracted_data = self._extract_with_openai(api_key, model_name, b64_image, mime_type, prompt_text)
+                
+                _logger.info(f"OCR Manager: Datos extraídos (JSON raw): {json.dumps(extracted_data)}")
+
+                # 5. Aplicar datos a la factura
+                self._apply_ai_results(extracted_data)
+                
+                # 6. Actualizar estado para Odoo
+                self.extract_state = 'waiting_validation' 
+                # self.extract_status_code = 200  <-- LÍNEA ELIMINADA (Causaba el error)
+                
+                # Mensaje en el chatter
+                self.message_post(body=f"Digitalización IA completada con éxito usando {company.ocr_provider}.")
+                
+                return True
+
+            except Exception as e:
+                # MANEJO DE ERRORES ROBUSTO
+                error_msg = f"Fallo en IA Propia: {str(e)}"
+                _logger.error(error_msg)
+                
+                # Guardamos el error en el campo correcto que SÍ existe
+                self.extract_error_message = error_msg
+                self.extract_state = 'error_status' 
+                
+                # Notificamos en el chatter para que el usuario lo vea
+                self.message_post(body=error_msg)
+                
+                # Retornamos False para indicar que no se pudo procesar, pero sin romper Odoo
+                return False
