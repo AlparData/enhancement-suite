@@ -15,6 +15,7 @@
                             <field name="ocr_provider"/>
                             <field name="ocr_api_key" password="True"/>
                             <field name="ocr_ai_model"/>
+                            <field name="ocr_prompt_id" options="{'no_create': True}"/>
                         </group>
                     </group>
                 </page>

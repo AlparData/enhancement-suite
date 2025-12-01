@@ -22,3 +22,9 @@ class ResCompany(models.Model):
         default="gemini-1.5-flash-002", 
         help="Ej: gemini-1.5-flash-002, gemini-1.5-pro-002"
     )
+    ocr_prompt_id = fields.Many2one(
+        'ocr.prompt', 
+        string="Prompt a Utilizar",
+        domain="[('provider_type', '=', ocr_provider)]", # Filtra por el proveedor seleccionado (Google/OpenAI)
+        help="Si se selecciona, se usará este prompt específico ignorando los códigos por defecto."
+    )

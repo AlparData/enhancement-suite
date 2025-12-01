@@ -28,12 +28,24 @@ _logger = logging.getLogger(__name__)
 class ExtractMixin(models.AbstractModel):
     _inherit = 'extract.mixin'
 
-    def _get_manager_prompt(self, provider_type, document_type='invoice'):
-        """Busca el prompt configurado en la base de datos"""
+    def _get_manager_prompt(self, company, provider_type, document_type='invoice'):
+        """
+        Lógica de selección de Prompt mejorada:
+        1. Si la compañía tiene un prompt fijo seleccionado -> USAR ESE.
+        2. Si no, buscar por código estándar (invoice_google, invoice_openai).
+        3. Fallback genérico.
+        """
+        # PRIORIDAD 1: Configuración explícita en la compañía
+        # (Requiere haber agregado el campo ocr_prompt_id en res.company)
+        if getattr(company, 'ocr_prompt_id', False):
+             return company.ocr_prompt_id.template
+
+        # PRIORIDAD 2: Búsqueda por código (Comportamiento legacy)
         expected_code = f"{document_type}_{provider_type}"
         prompt = self.env['ocr.prompt'].search([('code', '=', expected_code)], limit=1)
         if prompt:
             return prompt.template
+            
         # Fallback genérico por si no existe la configuración
         return "Analiza este documento y extrae los datos clave (emisor, fecha, total, líneas) en JSON."
 
@@ -229,7 +241,8 @@ class ExtractMixin(models.AbstractModel):
                 b64_image, mime_type = self._process_file_content(attachment)
                 
                 # 3. Obtener prompt y credenciales
-                prompt_text = self._get_manager_prompt(company.ocr_provider, 'invoice')
+                # AQUI EL CAMBIO CLAVE: Pasamos 'company' para leer el ocr_prompt_id
+                prompt_text = self._get_manager_prompt(company, company.ocr_provider, 'invoice')
                 api_key = company.ocr_api_key
                 model_name = company.ocr_ai_model
 
@@ -250,7 +263,6 @@ class ExtractMixin(models.AbstractModel):
                 
                 # 6. Actualizar estado para Odoo
                 self.extract_state = 'waiting_validation' 
-                # self.extract_status_code = 200  <-- LÍNEA ELIMINADA (Causaba el error)
                 
                 # Mensaje en el chatter
                 self.message_post(body=f"Digitalización IA completada con éxito usando {company.ocr_provider}.")
@@ -269,5 +281,5 @@ class ExtractMixin(models.AbstractModel):
                 # Notificamos en el chatter para que el usuario lo vea
                 self.message_post(body=error_msg)
                 
-                # Retornamos False para indicar que no se pudo procesar, pero sin romper Odoo
+                # Retornamos False para indicar que no se pudo procesar
                 return False
