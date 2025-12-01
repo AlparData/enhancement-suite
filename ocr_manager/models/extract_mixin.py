@@ -259,7 +259,8 @@ class ExtractMixin(models.AbstractModel):
             return True
 
         except Exception as e:
-            _logger.error(f"OCR Manager Falló: {e}. Ejecutando fallback a OCR nativo de Odoo.")
+            #_logger.error(f"OCR Manager Falló: {e}. Ejecutando fallback a OCR nativo de Odoo.")
             # Opcional: Notificar en el chatter que hubo un fallo y se usó el nativo
-            self.message_post(body=f"Fallo en IA Propia ({str(e)}). Se intentará usar el servicio nativo de Odoo.")
-            return super(ExtractMixin, self)._upload_to_extract()
+            #self.message_post(body=f"Fallo en IA Propia ({str(e)}). Se intentará usar el servicio nativo de Odoo.")
+            #return super(ExtractMixin, self)._upload_to_extract()
+            raise UserError(f"ERROR REAL DE LA IA: {str(e)}")
